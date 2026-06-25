@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Document;
+use App\Models\DocumentReview;
 use App\Models\User;
 
 class DocumentReviewAuthorizationService
@@ -10,6 +11,8 @@ class DocumentReviewAuthorizationService
     public function __construct(
         private DocumentStatusService $statusService,
     ) {}
+
+    public const int REVISION_LIMIT = 2;
 
     /**
      * Check if user can submit a review for this document (current version)
@@ -21,6 +24,21 @@ class DocumentReviewAuthorizationService
         }
 
         return ! $this->hasReviewedCurrentVersion($document, $user);
+    }
+
+    /**
+     * Check if the user has reached the maximum number of revision requests
+     * they are allowed to submit for this document across all versions.
+     */
+    public function hasExceededRevisionLimit(Document $document, User $user): bool
+    {
+        $count = DocumentReview::query()
+            ->where('document_id', $document->id)
+            ->where('user_id', $user->id)
+            ->where('status', 'revision')
+            ->count();
+
+        return $count >= self::REVISION_LIMIT;
     }
 
     /**

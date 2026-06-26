@@ -6,8 +6,8 @@ use App\Filament\AvatarProviders\LocalSvgAvatarProvider;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\Documents\Widgets\ApprovalDocumentWidget;
+use App\Filament\Widgets\AccountWidget;
 use App\Livewire\Filament\DatabaseNotifications;
-use Arnautdev\FilamentDeployIndicator\FilamentDeployIndicatorPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Bjanczak\FilamentFlexFields\FilamentFlexFieldsPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -18,7 +18,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use App\Filament\Widgets\AccountWidget;
+use Filament\View\PanelsRenderHook;
 use Hammadzafar05\MobileBottomNav\MobileBottomNav;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -48,11 +48,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Poppins')
             ->databaseNotifications(
-                condition: fn(): bool => Auth::check(),
+                condition: fn (): bool => Auth::check(),
                 livewireComponent: DatabaseNotifications::class,
             )
             ->databaseNotificationsPolling(null)
-            ->brandName(str('<div style="align-items: center; display: flex;"><img src="' . asset('logo_light.png') . '" alt="DocuCast" style="height: 40px; margin-right: 10px;"> DocuCast</div>')->inlineMarkdown()->toHtmlString())
+            ->brandName(str('<div style="align-items: center; display: flex;"><img src="'.asset('logo_light.png').'" alt="DocuCast" style="height: 40px; margin-right: 10px;"> DocuCast</div>')->inlineMarkdown()->toHtmlString())
             ->favicon(asset('logo_light.png'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -81,10 +81,16 @@ class AdminPanelProvider extends PanelProvider
                     ->fromNavigation(limit: 4),
                 FilamentTourPlugin::make(),
                 FilamentFlexFieldsPlugin::make(),
-                EnvironmentIndicatorPlugin::make()->visible(fn(): bool => Auth::user()?->hasRole('super_admin') ?? false)
+                EnvironmentIndicatorPlugin::make()->visible(fn (): bool => Auth::user()?->hasRole('super_admin') ?? false),
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => auth()->check()
+                    ? view('filament.components.login-notice-popup-hook')
+                    : view('filament.components.login-notice-cleanup'),
+            );
     }
 }

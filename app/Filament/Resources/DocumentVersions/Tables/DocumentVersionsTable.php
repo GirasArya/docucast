@@ -16,7 +16,7 @@ class DocumentVersionsTable
         $table = $table
             ->columns([
                 TextColumn::make('document.title')
-                    ->label('Document Title')
+                    ->label('Record Title')
                     ->searchable()
                     ->sortable(),
 
@@ -26,10 +26,10 @@ class DocumentVersionsTable
                     ->sortable(),
 
                 TextColumn::make('original_filename')
-                    ->label('File')
+                    ->label('Document File')
                     ->searchable()
                     ->icon('heroicon-o-document')
-                    ->url(fn (DocumentVersion $record): string => route('documents.preview', [
+                    ->url(fn(DocumentVersion $record): string => route('documents.preview', [
                         'document' => $record->document_id,
                         'version' => $record->version_number,
                     ]))
@@ -37,15 +37,16 @@ class DocumentVersionsTable
 
                 TextColumn::make('document.uploader.name')
                     ->label('Uploader')
+                    ->badge()->color('success')
                     ->searchable()
                     ->sortable()
-                    ->visible(fn () => $user->hasAnyRole(['super_admin', 'admin', 'recipient'])),
+                    ->visible(fn() => $user->hasAnyRole(['super_admin', 'admin', 'recipient'])),
 
                 TextColumn::make('document.recipients.name')
                     ->label('Recipients')
-                    ->badge()
+                    ->badge()->color('warning')
                     ->searchable()
-                    ->visible(fn () => $user->hasAnyRole(['super_admin', 'admin', 'uploader'])),
+                    ->visible(fn() => $user->hasAnyRole(['super_admin', 'admin', 'uploader'])),
 
                 TextColumn::make('created_at')
                     ->label('Uploaded At')
@@ -61,8 +62,8 @@ class DocumentVersionsTable
             ])
             ->toolbarActions([
                 //
-            ]);
-
+            ])
+            ->defaultSort('created_at', 'asc');
         // Group by Uploader if the user is a recipient
         // if ($user->hasRole('recipient') && !$user->hasAnyRole(['super_admin', 'admin'])) {
         //     $table->defaultGroup('document.uploader.name');

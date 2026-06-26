@@ -27,7 +27,10 @@ class EditDocument extends EditRecord
     protected function getFormActions(): array
     {
         return [
-            $this->getSaveFormAction()->label('Simpan Perubahan')->icon('heroicon-o-clipboard-document-check'),
+            $this->getSaveFormAction()
+                ->label('Simpan Perubahan')
+                ->icon('heroicon-o-clipboard-document-check')
+                ->disabled($this->getRecord()->status === 'approved'),
             $this->getCancelFormAction()->label("Batal")->icon('heroicon-o-x-circle'),
         ];
     }

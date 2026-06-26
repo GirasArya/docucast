@@ -52,6 +52,10 @@ class DocumentPolicy
 
     public function delete(User $user, Document $document): bool
     {
+        if ($document->status === 'approved' && ($user->hasRole('uploader') || $user->hasRole('recipient'))) {
+            return false;
+        }
+
         return $this->update($user, $document);
     }
 
@@ -62,6 +66,10 @@ class DocumentPolicy
 
     public function forceDelete(User $user, Document $document): bool
     {
+        if ($document->status === 'approved' && ($user->hasRole('uploader') || $user->hasRole('recipient'))) {
+            return false;
+        }
+
         return $this->update($user, $document);
     }
 

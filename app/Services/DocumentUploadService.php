@@ -119,6 +119,16 @@ class DocumentUploadService
      */
     public function deleteDocumentFiles(Document $document): void
     {
+        $user = auth()->user();
+        if ($document->status === 'approved' && $user && ($user->hasRole('uploader') || $user->hasRole('recipient'))) {
+            throw new \Exception('Dokumen yang telah disetujui tidak dapat dihapus oleh pengunggah atau penerima.');
+        }
+
+        // If the document is not being permanently deleted (force deleted), do not delete the physical files.
+        if (method_exists($document, 'isForceDeleting') && ! $document->isForceDeleting()) {
+            return;
+        }
+
         $document->versions()->each(function (DocumentVersion $version): void {
             if (Storage::exists($version->file_storage_path)) {
                 Storage::delete($version->file_storage_path);

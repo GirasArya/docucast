@@ -61,6 +61,16 @@ class DocumentResource extends Resource
 
     public static function canDelete(Model $record): bool
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
+        $user = Auth::user();
+
+        if ($record->status === 'approved' && ($user->hasRole('uploader') || $user->hasRole('recipient'))) {
+            return false;
+        }
+
         return static::canEdit($record);
     }
 

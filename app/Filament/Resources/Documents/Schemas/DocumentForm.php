@@ -71,7 +71,7 @@ class DocumentForm
                             ->directory('documents')
                             ->storeFileNamesIn('file_name')
                             ->pdfToolbar(true)
-                            ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/*'])
+                            ->acceptedFileTypes(['application/pdf', 'image/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msexcel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
                             ->maxSize(10240)
                             ->pdfPreviewHeight(700)
                             ->columnSpanFull(),

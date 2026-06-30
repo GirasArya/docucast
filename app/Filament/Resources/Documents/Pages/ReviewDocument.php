@@ -215,7 +215,7 @@ class ReviewDocument extends Page implements HasForms
                                                 ->directory('review-attachments')
                                                 ->storeFileNamesIn('attachment_name')
                                                 ->maxSize(5120) // 5MB
-                                                ->acceptedFileTypes(['application/pdf', 'image/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
+                                                ->acceptedFileTypes(['application/pdf', 'image/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msexcel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']),
                                         ]),
 
                                     Tab::make('Document Info')

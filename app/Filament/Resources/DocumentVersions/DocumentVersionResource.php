@@ -17,7 +17,7 @@ class DocumentVersionResource extends Resource
 {
     protected static ?string $model = DocumentVersion::class;
 
-    protected static ?string $pluralModelLabel = 'Semua Versi';
+    protected static ?string $pluralModelLabel = 'Riwayat Versi';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

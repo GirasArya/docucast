@@ -21,7 +21,7 @@ class ApprovalDocumentWidget extends BaseWidget
 
     protected int|string|array $columnSpan = 'full';
 
-    protected static ?string $heading = 'Documents Pending Your Review';
+    protected static ?string $heading = 'Verifikasi Dokumen';
 
     public function table(Table $table): Table
     {
@@ -89,8 +89,8 @@ class ApprovalDocumentWidget extends BaseWidget
             ])
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
-            ->emptyStateHeading('No documents to review')
-            ->emptyStateDescription('You have no pending documents awaiting your review.')
+            ->emptyStateHeading('Tidak Ada Dokumen')
+            ->emptyStateDescription('Tidak ada dokumen yang perlu ditinjau.')
             ->emptyStateIcon('heroicon-o-check-circle');
     }
 }

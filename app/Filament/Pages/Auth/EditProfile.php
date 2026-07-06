@@ -35,7 +35,7 @@ class EditProfile extends BaseEditProfile
     protected function getNikFormComponent(): Component
     {
         return TextInput::make('nik')
-            ->label('Username (NIK)')
+            ->label('Username (NPK)')
             ->disabled();
     }
 
@@ -73,7 +73,8 @@ class EditProfile extends BaseEditProfile
         return TextInput::make('telegram_chat_id')
             ->label('Telegram Chat ID')
             ->password()
-            ->revealable();
+            ->revealable()
+            ->disabled();
     }
 
     /**
@@ -85,7 +86,8 @@ class EditProfile extends BaseEditProfile
     {
         return TextInput::make('phone_number')
             ->label('Phone Number')
-            ->numeric();
+            ->numeric()
+            ->disabled();
     }
 
     /**

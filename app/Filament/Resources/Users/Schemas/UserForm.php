@@ -44,10 +44,12 @@ class UserForm
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
                         TextInput::make('telegram_chat_id')
+                            ->disabled()
                             ->label('Telegram Chat ID')
                             ->maxLength(255)
                             ->hint('Required for Telegram notifications.'),
                         TextInput::make('phone_number')
+                            ->disabled()
                             ->label('Whatsapp Phone Number')
                             ->numeric()
                             ->hint('Required for Whatsapp notifications.'),

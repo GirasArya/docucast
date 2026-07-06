@@ -30,14 +30,29 @@ class DocumentPreviewController extends Controller
 
         abort_unless($isAllowed, 403);
 
-        $filePath = $document->file_path;
-        $fileName = $document->file_name;
-
+        $currentVersionId = null;
         if ($versionNumber = request('version')) {
             $version = $document->versions()->where('version_number', $versionNumber)->first();
             if ($version) {
+                $currentVersionId = $version->id;
                 $filePath = $version->file_storage_path;
                 $fileName = $version->original_filename;
+            }
+        } else {
+            $currentVersionId = $document->versions()->max('id');
+            $filePath = $document->file_path;
+            $fileName = $document->file_name;
+        }
+
+        if ($currentVersionId && request('mode') !== 'original') {
+            $signature = \App\Models\DocumentSignature::where('document_id', $document->id)
+                ->where('document_version_id', $currentVersionId)
+                ->latest('id')
+                ->first();
+
+            if ($signature && $signature->signed_document_path) {
+                $filePath = $signature->signed_document_path;
+                $fileName = basename($filePath);
             }
         }
 

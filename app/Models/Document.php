@@ -147,6 +147,11 @@ class Document extends Model
         return $this->hasMany(DocumentVersion::class);
     }
 
+    public function signatures(): HasMany
+    {
+        return $this->hasMany(DocumentSignature::class);
+    }
+
     public function updateStatusBasedOnReviews(): void
     {
         app(DocumentStatusService::class)->updateStatus($this);

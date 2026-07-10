@@ -305,35 +305,26 @@
             cursor: grab;
             user-select: none;
             border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, .25), 0 1px 3px rgba(0, 0, 0, .15);
-            border: 2px solid rgba(255, 255, 255, .9);
-            transition: box-shadow .15s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            border: 1px dashed var(--primary-600);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 2px;
+            box-sizing: border-box;
+            transition: border-color .15s, box-shadow .15s;
             touch-action: none;
             z-index: 10;
         }
 
         .own-sig-qr-stamp:hover {
-            box-shadow: 0 6px 20px rgba(0, 0, 0, .3), 0 2px 6px rgba(0, 0, 0, .18);
+            border-color: var(--primary-500);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, .22);
         }
 
         .own-sig-qr-stamp.is-dragging {
             cursor: grabbing;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, .35), 0 4px 10px rgba(0, 0, 0, .2);
-        }
-
-        .own-sig-qr-drag-hint {
-            position: absolute;
-            bottom: -1.25rem;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, .9);
-            background: rgba(0, 0, 0, .55);
-            padding: 2px 6px;
-            border-radius: 4px;
-            white-space: nowrap;
-            pointer-events: none;
-            letter-spacing: .03em;
+            border-style: solid;
+            border-color: var(--primary-700);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .28);
         }
 
         /* ── QR Resize Handle ───────────────────────── */
@@ -593,6 +584,58 @@
         .dark .own-sig-btn-outline:hover:not(:disabled) {
             background-color: var(--gray-700);
         }
+
+        .own-sig-select-wrapper {
+            position: relative;
+            width: 100%;
+            margin-top: 0.375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .own-sig-select-input {
+            width: 100%;
+            font-size: 0.775rem;
+            color: rgb(17, 24, 39);
+            background-color: rgb(249, 250, 251);
+            border: 1px solid rgb(229, 231, 235);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1rem 1rem;
+            padding-right: 2rem;
+        }
+
+        .own-sig-select-input:focus {
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-500) 20%, transparent);
+        }
+
+        .dark .own-sig-select-input {
+            color: rgb(229, 231, 235);
+            background-color: rgba(255, 255, 255, .04);
+            border-color: rgba(255, 255, 255, .08);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        }
+
+        .dark .own-sig-select-input option {
+            background-color: var(--gray-900);
+            color: rgb(229, 231, 235);
+        }
+
+        .own-sig-select-input option:disabled {
+            color: rgb(156, 163, 175);
+            opacity: 0.5;
+        }
+
+        .dark .own-sig-select-input option:disabled {
+            color: rgb(75, 85, 99);
+        }
     </style>
 
     {{-- Hidden QR render target --}}
@@ -690,11 +733,10 @@
 
                         {{-- Draggable QR stamp with Resize Handle --}}
                         <div class="own-sig-qr-stamp" x-show="qrReady" :class="{ 'is-dragging': isDragging }"
-                            :style="`left:${qrX}px;top:${qrY}px;width:${qrDisplaySize}px;height:${qrDisplaySize}px;`"
+                            :style="`left:${qrX}px;top:${qrY}px;width:${qrDisplaySize}px;height:${qrDisplaySize * qrHeightRatio}px;`"
                             @mousedown.prevent="startDrag($event)" @touchstart.prevent="startDragTouch($event)">
                             <img :src="qrDataUrl" draggable="false"
                                 style="width:100%;height:100%;display:block;border-radius:4px;">
-                            <div class="own-sig-qr-drag-hint">⠿ Seret ke posisi</div>
 
                             {{-- Resize Handle --}}
                             <div class="own-sig-qr-resize-handle" @mousedown.prevent.stop="startResize($event)"
@@ -776,7 +818,7 @@
                     </div>
                     <div class="own-sig-header-text">
                         <span class="own-sig-header-title">Tanda Tangan Digital</span>
-                        <span class="own-sig-header-sub">Identitas · Hash SHA-256 · Timestamp</span>
+                        <span class="own-sig-header-sub">QR hanya berlaku untuk dokumen internal saja</span>
                     </div>
                 </div>
                 <div class="own-sig-card-body">
@@ -805,6 +847,22 @@
                             <span class="own-sig-cred-label">Timestamp</span>
                             <div class="own-sig-cred-val" x-text="timestamp || '— belum ditandatangani —'"
                                 :class="{ muted: !timestamp }"></div>
+                        </div>
+                    </div>
+
+                    {{-- QR Style Selection --}}
+                    <div class="own-sig-cred-item" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                        <span class="own-sig-cred-label">Gaya Tanda Tangan / QR</span>
+                        <div class="own-sig-select-wrapper">
+                            <select x-model="qrStyle" @change="if (hasFile && qrReady) generateSignature()"
+                                class="own-sig-select-input">
+                                <option value="raw">QR Code</option>
+                                <option value="bordered">QR Code dengan Nama</option>
+                                <option value="signature_only" :disabled="!userSignatureUrl">Tanda Tangan Digital
+                                </option>
+                                <option value="signature_qr" :disabled="!userSignatureUrl">Tanda Tangan dengan QR
+                                </option>
+                            </select>
                         </div>
                     </div>
 
@@ -884,10 +942,23 @@
                 resizeStartSize: 0,
                 fileHash: '',
                 timestamp: '',
+                qrStyle: 'raw',
+                qrHeightRatio: 1.0,
                 userName: @js(auth()->user()->name ?? ''),
                 userId: @js(auth()->user()->id ?? ''),
                 userNPK: @js(auth()->user()->nik ?? ''),
                 userEmail: @js(auth()->user()->email ?? ''),
+                userSignatureUrl: @js(
+    \App\Models\DrawSignature::where('user_id', auth()->id())
+        ->latest()
+        ->first()?->file_path
+        ? Storage::disk('public')->url(
+            \App\Models\DrawSignature::where('user_id', auth()->id())
+                ->latest()
+                ->first()->file_path,
+        )
+        : null,
+),
 
                 async initLibs() {
                     await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js');
@@ -1008,6 +1079,7 @@
                         this.qrX = (config.x / refW) * displayW;
                         this.qrY = (config.y / refH) * displayH;
                         this.qrDisplaySize = (config.size / refW) * displayW;
+                        this.qrHeightRatio = config.heightRatio || 1.0;
 
                         this.timestamp = config.timestamp;
                     } else if (config) {
@@ -1016,6 +1088,7 @@
                         this.qrX = config.x;
                         this.qrY = config.y;
                         this.qrDisplaySize = config.size;
+                        this.qrHeightRatio = config.heightRatio || 1.0;
                         this.timestamp = config.timestamp;
                     } else {
                         this.qrReady = false;
@@ -1023,6 +1096,8 @@
                         this.qrX = 20;
                         this.qrY = 20;
                         this.qrDisplaySize = 120;
+                        this.qrHeightRatio = (this.qrStyle === 'bordered' || this.qrStyle === 'signature_only' || this
+                            .qrStyle === 'signature_qr') ? (170 / 380) : 1.0;
                         this.timestamp = '';
                     }
                 },
@@ -1040,6 +1115,8 @@
                     this.pageCount = 0;
                     this.error = '';
                     this.timestamp = '';
+                    this.qrHeightRatio = (this.qrStyle === 'bordered' || this.qrStyle === 'signature_only' || this
+                        .qrStyle === 'signature_qr') ? (170 / 380) : 1.0;
                 },
 
                 async prevPage() {
@@ -1075,6 +1152,19 @@
 
                 async generateSignature() {
                     if (!this.hasFile || this.loading) return;
+
+                    // Load user signature image if needed
+                    let sigImg = null;
+                    if ((this.qrStyle === 'signature_only' || this.qrStyle === 'signature_qr') && this
+                        .userSignatureUrl) {
+                        sigImg = new Image();
+                        sigImg.src = this.userSignatureUrl;
+                        await new Promise((resolve) => {
+                            sigImg.onload = resolve;
+                            sigImg.onerror = resolve; // proceed anyway
+                        });
+                    }
+
                     this.timestamp = new Date().toLocaleString('id-ID', {
                         timeZone: 'Asia/Jakarta',
                         year: 'numeric',
@@ -1085,11 +1175,10 @@
                         second: '2-digit',
                     });
                     const payload = JSON.stringify({
-                        Id: this.userId,
                         NPK: this.userNpk,
                         Signer: this.userName,
                         Email: this.userEmail,
-                        Hash: this.fileHash.slice(0, 32),
+                        HashCode: this.fileHash.slice(0, 32),
                         timestamp: this.timestamp,
                     });
                     const target = document.getElementById('own-qr-rt');
@@ -1104,7 +1193,145 @@
                         setTimeout(resolve, 160);
                     });
                     const qrCanvas = target.querySelector('canvas');
-                    const dataUrl = qrCanvas ? qrCanvas.toDataURL('image/png') : '';
+                    let dataUrl = '';
+                    if (qrCanvas) {
+                        if (this.qrStyle === 'bordered' || this.qrStyle === 'signature_qr') {
+                            this.qrHeightRatio = 170 / 380;
+
+                            // Render custom bordered canvas (380x170)
+                            const finalCanvas = document.createElement('canvas');
+                            finalCanvas.width = 380;
+                            finalCanvas.height = 170;
+                            const ctx = finalCanvas.getContext('2d');
+
+                            // Fill white background
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(0, 0, 380, 170);
+
+                            // Setup text fonts & styling
+                            const textLeft = 42;
+                            const paddingX = 8; // padding around text for the gap
+
+                            // 1. Measure "Signed By"
+                            ctx.font = '500 18px "Inter", "Segoe UI", sans-serif';
+                            const signedByText = 'Signed By';
+                            const signedByWidth = ctx.measureText(signedByText).width;
+                            const gap1Start = textLeft - paddingX;
+                            const gap1End = textLeft + signedByWidth + paddingX;
+
+                            // 2. Measure userName
+                            // Handle font scaling if the user's name is too long
+                            let nameFontSize = 22;
+                            ctx.font = `bold ${nameFontSize}px "Inter", "Segoe UI", sans-serif`;
+                            let nameWidth = ctx.measureText(this.userName).width;
+                            // Ensure it does not exceed the QR code starting x
+                            while (nameWidth > 160 && nameFontSize > 12) {
+                                nameFontSize--;
+                                ctx.font = `bold ${nameFontSize}px "Inter", "Segoe UI", sans-serif`;
+                                nameWidth = ctx.measureText(this.userName).width;
+                            }
+                            const gap2Start = textLeft - paddingX;
+                            const gap2End = textLeft + nameWidth + paddingX;
+
+                            // Setup border styling
+                            ctx.strokeStyle = '#0f172a';
+                            ctx.lineWidth = 3;
+                            ctx.lineCap = 'square';
+
+                            const left = 10;
+                            const right = 370;
+                            const top = 10;
+                            const bottom = 160;
+
+                            // Draw Left vertical line
+                            ctx.beginPath();
+                            ctx.moveTo(left, top);
+                            ctx.lineTo(left, bottom);
+                            ctx.stroke();
+
+                            // Draw Right vertical line
+                            ctx.beginPath();
+                            ctx.moveTo(right, top);
+                            ctx.lineTo(right, bottom);
+                            ctx.stroke();
+
+                            // Draw Top horizontal lines with gap
+                            ctx.beginPath();
+                            ctx.moveTo(left, top);
+                            ctx.lineTo(gap1Start, top);
+                            ctx.stroke();
+
+                            ctx.beginPath();
+                            ctx.moveTo(gap1End, top);
+                            ctx.lineTo(right, top);
+                            ctx.stroke();
+
+                            // Draw Bottom horizontal lines with gap
+                            ctx.beginPath();
+                            ctx.moveTo(left, bottom);
+                            ctx.lineTo(gap2Start, bottom);
+                            ctx.stroke();
+
+                            ctx.beginPath();
+                            ctx.moveTo(gap2End, bottom);
+                            ctx.lineTo(right, bottom);
+                            ctx.stroke();
+
+                            // Render texts
+                            ctx.textBaseline = 'middle';
+                            ctx.textAlign = 'left';
+
+                            // Top Text: "Signed By"
+                            ctx.fillStyle = '#0f172a';
+                            ctx.font = '500 18px "Inter", "Segoe UI", sans-serif';
+                            ctx.fillText(signedByText, textLeft, top);
+
+                            // Bottom Text: User Name
+                            ctx.fillStyle = '#0f172a';
+                            ctx.font = `bold ${nameFontSize}px "Inter", "Segoe UI", sans-serif`;
+                            ctx.fillText(this.userName, textLeft, bottom);
+
+                            // Draw QR canvas centered on the right
+                            // QR size: 130x130. Vertically centered inside [10, 160]
+                            const qrSize = 130;
+                            const qrXPos = right - qrSize - 16;
+                            const qrYPos = top + (bottom - top - qrSize) / 2;
+                            ctx.drawImage(qrCanvas, qrXPos, qrYPos, qrSize, qrSize);
+
+                            // Draw user signature on the left if using signature_qr style
+                            if (this.qrStyle === 'signature_qr' && sigImg && sigImg.naturalWidth) {
+                                const sigMaxW = 180;
+                                const sigMaxH = 110;
+                                const scale = Math.min(sigMaxW / sigImg.naturalWidth, sigMaxH / sigImg.naturalHeight);
+                                const w = sigImg.naturalWidth * scale;
+                                const h = sigImg.naturalHeight * scale;
+                                const x = 10 + (200 - w) / 2;
+                                const y = 10 + (150 - h) / 2;
+                                ctx.drawImage(sigImg, x, y, w, h);
+                            }
+
+                            dataUrl = finalCanvas.toDataURL('image/png');
+                        } else if (this.qrStyle === 'signature_only') {
+                            this.qrHeightRatio = 170 / 380;
+                            const finalCanvas = document.createElement('canvas');
+                            finalCanvas.width = 380;
+                            finalCanvas.height = 170;
+                            const ctx = finalCanvas.getContext('2d');
+                            ctx.clearRect(0, 0, 380, 170); // transparent background
+                            if (sigImg && sigImg.naturalWidth) {
+                                const scale = Math.min(380 / sigImg.naturalWidth, 170 / sigImg.naturalHeight);
+                                const w = sigImg.naturalWidth * scale;
+                                const h = sigImg.naturalHeight * scale;
+                                const x = (380 - w) / 2;
+                                const y = (170 - h) / 2;
+                                ctx.drawImage(sigImg, x, y, w, h);
+                            }
+                            dataUrl = finalCanvas.toDataURL('image/png');
+                        } else {
+                            this.qrHeightRatio = 1.0;
+                            dataUrl = qrCanvas.toDataURL('image/png');
+                        }
+                    }
                     const canvas = this.$refs.pdfCanvas;
 
                     this.pageQrs[this.pageNum] = {
@@ -1112,6 +1339,7 @@
                         x: Math.max(0, canvas.clientWidth - 120 - 16),
                         y: 16,
                         size: 120,
+                        heightRatio: this.qrHeightRatio,
                         timestamp: this.timestamp,
                         refW: canvas.clientWidth, // ← reference frame this placement was drawn against
                         refH: canvas.clientHeight, // ←
@@ -1164,10 +1392,11 @@
                     const canvas = this.$refs.pdfCanvas;
                     if (!w || !canvas) return;
                     const r = w.getBoundingClientRect();
+                    const qrHeight = this.qrDisplaySize * this.qrHeightRatio;
                     this.qrX = Math.max(0, Math.min(cx - r.left - this.dragOffsetX + w.scrollLeft, canvas.clientWidth - this
                         .qrDisplaySize));
-                    this.qrY = Math.max(0, Math.min(cy - r.top - this.dragOffsetY + w.scrollTop, canvas.clientHeight - this
-                        .qrDisplaySize));
+                    this.qrY = Math.max(0, Math.min(cy - r.top - this.dragOffsetY + w.scrollTop, canvas.clientHeight -
+                        qrHeight));
 
                     if (this.pageQrs[this.pageNum]) {
                         this.pageQrs[this.pageNum].x = this.qrX;
@@ -1183,7 +1412,7 @@
                     const canvas = this.$refs.pdfCanvas;
                     if (canvas) {
                         const maxW = canvas.clientWidth - this.qrX;
-                        const maxH = canvas.clientHeight - this.qrY;
+                        const maxH = (canvas.clientHeight - this.qrY) / this.qrHeightRatio;
                         this.qrDisplaySize = Math.min(newSize, maxW, maxH);
                     } else {
                         this.qrDisplaySize = newSize;
@@ -1243,8 +1472,9 @@
                                 const qrCx = qrXPct * tempCanvas.width;
                                 const qrCy = qrYPct * tempCanvas.height;
                                 const qrSz = qrSizePctW * tempCanvas.width;
+                                const qrHeightRatio = config.heightRatio || 1.0;
 
-                                ctx.drawImage(qrImg, qrCx, qrCy, qrSz, qrSz);
+                                ctx.drawImage(qrImg, qrCx, qrCy, qrSz, qrSz * qrHeightRatio);
                             }
 
                             const imgData = tempCanvas.toDataURL('image/jpeg', 0.95);

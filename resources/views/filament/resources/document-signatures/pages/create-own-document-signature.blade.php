@@ -1401,7 +1401,10 @@
                     if (this.pageQrs[this.pageNum]) {
                         this.pageQrs[this.pageNum].x = this.qrX;
                         this.pageQrs[this.pageNum].y = this.qrY;
-                        // keep refW/refH as originally recorded — do not overwrite
+                        // ← Resync reference frame to CURRENT canvas size, since we just wrote
+                        //    x/y in terms of the current zoom's pixel dimensions
+                        this.pageQrs[this.pageNum].refW = canvas.clientWidth;
+                        this.pageQrs[this.pageNum].refH = canvas.clientHeight;
                     }
                 },
                 _doResize(cx, cy) {
@@ -1419,6 +1422,11 @@
                     }
                     if (this.pageQrs[this.pageNum]) {
                         this.pageQrs[this.pageNum].size = this.qrDisplaySize;
+                        // ← Same fix: resync reference frame here too
+                        if (canvas) {
+                            this.pageQrs[this.pageNum].refW = canvas.clientWidth;
+                            this.pageQrs[this.pageNum].refH = canvas.clientHeight;
+                        }
                     }
                 },
                 stopDrag() {
@@ -1441,10 +1449,21 @@
                         } = window.jspdf;
                         let pdfDocInstance = null;
 
+                        const RENDER_SCALE = 2.5; // fixed rasterization quality, independent of page size
+
                         for (let i = 1; i <= this.pageCount; i++) {
                             const page = await _pdfDoc.getPage(i);
+
+                            // Original page size in PDF points (this is the TRUE physical size — e.g. A4 = 595.28 x 841.89)
+                            const vp0 = page.getViewport({
+                                scale: 1
+                            });
+                            const pageWidthPt = vp0.width;
+                            const pageHeightPt = vp0.height;
+
+                            // Render at higher resolution for crisp output, but this does NOT affect final page size
                             const viewport = page.getViewport({
-                                scale: 2.0
+                                scale: RENDER_SCALE
                             });
                             const tempCanvas = document.createElement('canvas');
                             tempCanvas.width = viewport.width;
@@ -1457,7 +1476,7 @@
 
                             const config = this.pageQrs[i];
                             if (config && config.dataUrl && config.refW && config.refH) {
-                                const qrXPct = config.x / config.refW; // ← use THIS placement's own reference
+                                const qrXPct = config.x / config.refW;
                                 const qrYPct = config.y / config.refH;
                                 const qrSizePctW = config.size / config.refW;
 
@@ -1478,18 +1497,23 @@
                             }
 
                             const imgData = tempCanvas.toDataURL('image/jpeg', 0.95);
+
                             if (i === 1) {
                                 pdfDocInstance = new jsPDF({
-                                    orientation: tempCanvas.width > tempCanvas.height ? 'l' : 'p',
-                                    unit: 'px',
-                                    format: [tempCanvas.width, tempCanvas.height],
+                                    orientation: pageWidthPt > pageHeightPt ? 'l' : 'p',
+                                    unit: 'pt', // ← physical unit, not px
+                                    format: [pageWidthPt,
+                                        pageHeightPt
+                                    ], // ← TRUE original page size (A4, Letter, etc.)
                                     compress: true
                                 });
                             } else {
-                                pdfDocInstance.addPage([tempCanvas.width, tempCanvas.height], tempCanvas.width >
-                                    tempCanvas.height ? 'l' : 'p');
+                                pdfDocInstance.addPage([pageWidthPt, pageHeightPt], pageWidthPt > pageHeightPt ? 'l' :
+                                    'p');
                             }
-                            pdfDocInstance.addImage(imgData, 'JPEG', 0, 0, tempCanvas.width, tempCanvas.height);
+
+                            // Draw the (higher-res) image scaled DOWN to fit the true page point-size
+                            pdfDocInstance.addImage(imgData, 'JPEG', 0, 0, pageWidthPt, pageHeightPt);
                         }
 
                         if (pdfDocInstance) {

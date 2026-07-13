@@ -9,16 +9,35 @@ use App\Services\DocumentRecipientResolver;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 class EditDocument extends EditRecord
 {
     protected static string $resource = DocumentResource::class;
 
+    protected static ?string $title = 'Detail Dokumen';
+
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()->label('Hapus')->icon('heroicon-o-trash'),
         ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()
+                ->label('Simpan Perubahan')
+                ->icon('heroicon-o-clipboard-document-check')
+                ->disabled($this->getRecord()->status === 'approved'),
+            $this->getCancelFormAction()->label("Batal")->icon('heroicon-o-x-circle'),
+        ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
@@ -42,6 +61,7 @@ class EditDocument extends EditRecord
         $state = $this->form->getRawState();
         $newRecipientIds = app(DocumentRecipientResolver::class)->syncRecipientsFromState($this->record, $state);
 
+        // Notify newly added recipients
         if (count($newRecipientIds) > 0) {
             $recipients = User::query()
                 ->whereIn('id', $newRecipientIds)
@@ -51,17 +71,7 @@ class EditDocument extends EditRecord
                 $dashboardNotification = Notification::make()
                     ->title('New Document Assigned')
                     ->body(sprintf('A new document "%s" (%s) has been assigned to you.', $this->record->title, $this->record->unique_code))
-                    ->info()
-                    ->viewData([
-                        'detail' => [
-                            'document_id' => $this->record->id,
-                            'document_title' => $this->record->title,
-                            'document_unique_code' => $this->record->unique_code,
-                            'review_status' => 'pending',
-                            'review_message' => 'You have a new document to review.',
-                            'reviewer_name' => null,
-                        ],
-                    ]);
+                    ->info();
 
                 $dashboardNotification->sendToDatabase($recipients);
                 try {
@@ -70,8 +80,30 @@ class EditDocument extends EditRecord
                     // Ignore broadcast exceptions
                 }
 
-                // Send Notification (Mail, Telegram)
                 foreach ($recipients as $recipient) {
+                    $recipient->notify(new DocumentAssignedNotification($this->record));
+                }
+            }
+        }
+
+        // Notify ALL current recipients when a new file version is uploaded
+        if ($this->record->wasChanged('file_path')) {
+            $allRecipients = $this->record->recipients()->get();
+
+            if ($allRecipients->isNotEmpty()) {
+                $dashboardNotification = Notification::make()
+                    ->title('Document Updated')
+                    ->body(sprintf('Document "%s" (%s) has been updated with a new version. Please review.', $this->record->title, $this->record->unique_code))
+                    ->info();
+
+                $dashboardNotification->sendToDatabase($allRecipients);
+                try {
+                    $dashboardNotification->broadcast($allRecipients);
+                } catch (\Exception $e) {
+                    // Ignore broadcast exceptions
+                }
+
+                foreach ($allRecipients as $recipient) {
                     $recipient->notify(new DocumentAssignedNotification($this->record));
                 }
             }

@@ -6,6 +6,7 @@ use App\Filament\Resources\Documents\DocumentResource;
 use App\Models\Document;
 use App\Models\DocumentReview;
 use App\Notifications\RecipientSubmittedReviewNotification;
+use App\Services\DocumentReviewAuthorizationService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
@@ -49,7 +50,7 @@ class ReviewDocument extends Page implements HasForms
 
     public function getTitle(): string|Htmlable
     {
-        return 'Review Document: '.$this->record->title;
+        return 'Review Document: ' . $this->record->title;
     }
 
     public function form(Schema $schema): Schema
@@ -66,9 +67,9 @@ class ReviewDocument extends Page implements HasForms
                             Placeholder::make('document_preview')
                                 ->hiddenLabel()
                                 ->dehydrated(false)
-                                ->content(fn (): HtmlString => $this->record ? new HtmlString(
+                                ->content(fn(): HtmlString => $this->record ? new HtmlString(
                                     str_ends_with(strtolower((string) ($this->record->file_name ?? $this->record->file_path)), '.pdf')
-                                    ? '
+                                        ? '
                                     <!-- Desktop Layout: hidden on mobile, shown on md and up -->
                                     <div class="review-desktop-preview" style="height: 78vh;">
                                         <!-- Preview Header Bar -->
@@ -81,17 +82,17 @@ class ReviewDocument extends Page implements HasForms
                                                 </div>
                                                 <div class="truncate">
                                                     <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
-                                                        '.e($this->record->file_name).'
+                                                        ' . e($this->record->file_name) . '
                                                     </p>
                                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">
-                                                        PDF Document • '.e($this->record->unique_code).'
+                                                        PDF Document • ' . e($this->record->unique_code) . '
                                                     </p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center space-x-2 shrink-0">
-                                                <a href="'.e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])).'" 
-                                                   target="_blank" 
-                                                   rel="noopener noreferrer" 
+                                                <a href="' . e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])) . '"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer"
                                                    class="btn-primary"
                                                 >
                                                     <svg class="h-3.5 w-3.5" width="14" height="14" style="width: 14px; height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -113,7 +114,7 @@ class ReviewDocument extends Page implements HasForms
                                                 }
                                             }
                                         }">
-                                            <iframe src="'.e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])).'" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"></iframe>
+                                            <iframe src="' . e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])) . '" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"></iframe>
                                         </div>
                                     </div>
 
@@ -128,16 +129,16 @@ class ReviewDocument extends Page implements HasForms
                                             <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Mobile PDF Preview</p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">PDF preview cannot be embedded directly on mobile devices.</p>
                                         </div>
-                                        <a href="'.e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])).'" 
-                                           target="_blank" 
-                                           rel="noopener noreferrer" 
+                                        <a href="' . e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])) . '"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
                                            class="btn-mobile-primary"
                                         >
                                             Open PDF in New Tab
                                         </a>
                                     </div>
                                     '
-                                    : '
+                                        : '
                                     <!-- Non-PDF Layout -->
                                     <div class="review-non-pdf-preview" style="height: 78vh;">
                                         <!-- Preview Header Bar -->
@@ -150,10 +151,10 @@ class ReviewDocument extends Page implements HasForms
                                                 </div>
                                                 <div class="truncate">
                                                     <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
-                                                        '.e($this->record->file_name).'
+                                                        ' . e($this->record->file_name) . '
                                                     </p>
                                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">
-                                                        File • '.e($this->record->unique_code).'
+                                                        File • ' . e($this->record->unique_code) . '
                                                     </p>
                                                 </div>
                                             </div>
@@ -169,9 +170,9 @@ class ReviewDocument extends Page implements HasForms
                                                 <p class="font-semibold text-base text-gray-800 dark:text-gray-200">No Embedded Preview Available</p>
                                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xs mx-auto">This file type cannot be previewed directly inside the page. You can open it in a new window or download it to view.</p>
                                             </div>
-                                            <a href="'.e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])).'" 
-                                               target="_blank" 
-                                               rel="noopener noreferrer" 
+                                            <a href="' . e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])) . '"
+                                               target="_blank"
+                                               rel="noopener noreferrer"
                                                class="btn-primary"
                                             >
                                                 <svg class="h-4 w-4" width="16" height="16" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -206,7 +207,7 @@ class ReviewDocument extends Page implements HasForms
                                                 ->label('Message / Notes')
                                                 ->rows(4)
                                                 ->placeholder('Write your review feedback, comments, or revision requests here...')
-                                                ->required(fn (Get $get): bool => $get('status') === 'revision'),
+                                                ->required(fn(Get $get): bool => $get('status') === 'revision'),
 
                                             FileUpload::make('attachment_path')
                                                 ->label('Attachment (Optional)')
@@ -214,7 +215,7 @@ class ReviewDocument extends Page implements HasForms
                                                 ->directory('review-attachments')
                                                 ->storeFileNamesIn('attachment_name')
                                                 ->maxSize(5120) // 5MB
-                                                ->acceptedFileTypes(['application/pdf', 'image/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
+                                                ->acceptedFileTypes(['application/pdf', 'image/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msexcel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']),
                                         ]),
 
                                     Tab::make('Document Info')
@@ -222,7 +223,7 @@ class ReviewDocument extends Page implements HasForms
                                         ->schema([
                                             Placeholder::make('document_info_details')
                                                 ->hiddenLabel()
-                                                ->content(fn () => $this->record ? view('filament.documents.review-document-details', [
+                                                ->content(fn() => $this->record ? view('filament.documents.review-document-details', [
                                                     'document' => $this->record,
                                                 ]) : ''),
                                         ]),
@@ -232,7 +233,7 @@ class ReviewDocument extends Page implements HasForms
                                         ->schema([
                                             Placeholder::make('document_history')
                                                 ->hiddenLabel()
-                                                ->content(fn () => $this->record ? view('filament.documents.review-document-history', [
+                                                ->content(fn() => $this->record ? view('filament.documents.review-document-history', [
                                                     'document' => $this->record,
                                                 ]) : ''),
                                         ]),
@@ -242,7 +243,7 @@ class ReviewDocument extends Page implements HasForms
                                         ->schema([
                                             Placeholder::make('document_recipients')
                                                 ->hiddenLabel()
-                                                ->content(fn () => $this->record ? view('filament.documents.review-document-recipients', [
+                                                ->content(fn() => $this->record ? view('filament.documents.review-document-recipients', [
                                                     'document' => $this->record,
                                                 ]) : ''),
                                         ]),
@@ -261,6 +262,22 @@ class ReviewDocument extends Page implements HasForms
 
         $formData = $this->form->getState();
 
+        // Enforce the revision limit: block if the user has already requested
+        // revision the maximum number of times for this document.
+        if (
+            $formData['status'] === 'revision' &&
+            app(DocumentReviewAuthorizationService::class)->hasExceededRevisionLimit($this->record, $user)
+        ) {
+            $limit = DocumentReviewAuthorizationService::REVISION_LIMIT;
+
+            FilamentNotification::make()
+                ->title('Revision Limit Reached')
+                ->body("Anda sudah memberikan revisi sebanyak {$limit}. Anda tidak bisa memberikan revisi lagi untuk dokumen ini.")
+                ->warning()
+                ->send();
+            return;
+        }
+
         $review = null;
 
         DB::transaction(function () use ($formData, $user, &$review): void {
@@ -269,22 +286,29 @@ class ReviewDocument extends Page implements HasForms
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            // Resolve the current (latest) version — this is what the user is reviewing
+            $currentVersionId = $document->versions()
+                ->max('id');
+
+            abort_unless($currentVersionId, 500, 'Document has no version.');
+
             $now = now();
 
             DocumentReview::query()->upsert(
                 [
                     [
-                        'document_id' => $document->id,
-                        'user_id' => $user->id,
-                        'status' => $formData['status'],
-                        'message' => $formData['message'] ?? null,
-                        'attachment_path' => $formData['attachment_path'] ?? null,
-                        'attachment_name' => $formData['attachment_name'] ?? null,
-                        'created_at' => $now,
-                        'updated_at' => $now,
+                        'document_id'         => $document->id,
+                        'document_version_id' => $currentVersionId,
+                        'user_id'             => $user->id,
+                        'status'              => $formData['status'],
+                        'message'             => $formData['message'] ?? null,
+                        'attachment_path'     => $formData['attachment_path'] ?? null,
+                        'attachment_name'     => $formData['attachment_name'] ?? null,
+                        'created_at'          => $now,
+                        'updated_at'          => $now,
                     ],
                 ],
-                ['document_id', 'user_id'],
+                ['document_version_id', 'user_id'],
                 ['status', 'message', 'attachment_path', 'attachment_name', 'updated_at'],
             );
 
@@ -292,6 +316,7 @@ class ReviewDocument extends Page implements HasForms
 
             // Fetch the review for notification
             $review = DocumentReview::where('document_id', $document->id)
+                ->where('document_version_id', $currentVersionId)
                 ->where('user_id', $user->id)
                 ->with('reviewer')
                 ->first();

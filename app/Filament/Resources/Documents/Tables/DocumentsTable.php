@@ -9,14 +9,18 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 
 class DocumentsTable
@@ -29,18 +33,24 @@ class DocumentsTable
             ->modifyQueryUsing(function (Builder $query) use ($user): Builder {
                 $query->with(['uploader:id,name']);
                 $query->withExists([
-                    'reviews as has_approved_reviews' => fn (Builder $reviewQuery): Builder => $reviewQuery->where('status', 'approved'),
+                    'reviews as has_approved_reviews' => fn(Builder $reviewQuery): Builder => $reviewQuery->where('status', 'approved'),
                 ]);
 
                 if ($user?->hasRole('recipient')) {
                     $query->withExists([
-                        'recipients as is_recipient' => fn (Builder $recipientQuery): Builder => $recipientQuery->where('users.id', $user->id),
-                        'reviews as has_approved_review_by_user' => fn (Builder $reviewQuery): Builder => $reviewQuery
+                        'recipients as is_recipient' => fn(Builder $recipientQuery): Builder => $recipientQuery->where('users.id', $user->id),
+                        // Hide the Review button if user has submitted ANY review (approved OR revision)
+                        // for the current version of the document. Button reappears when uploader
+                        // uploads a new version (new document_version_id).
+                        'reviews as has_approved_review_by_user' => fn(Builder $reviewQuery): Builder => $reviewQuery
                             ->where('user_id', $user->id)
-                            ->where('status', 'approved'),
+                            ->whereColumn(
+                                'document_reviews.document_version_id',
+                                '=',
+                                DB::raw('(SELECT MAX(id) FROM document_versions WHERE document_versions.document_id = documents.id)')
+                            ),
                     ]);
                 }
-
                 return $query;
             })
             ->columns([
@@ -48,19 +58,17 @@ class DocumentsTable
                     ->label('Date')
                     ->date('d M Y')
                     ->sortable(),
-                TextColumn::make('unique_code')
-                    ->label('Unique Code')
+                TextColumn::make('title')
+                    ->label('Title')
                     ->searchable()
-                    ->sortable()
-                    ->url(fn ($record): string => DocumentResource::getUrl('history', ['record' => $record]))
-                    ->color('primary'),
+                    ->sortable(),
                 TextColumn::make('uploader.name')
                     ->label('Uploaded By')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'pending' => 'warning',
                         'in_review' => 'info',
                         'approved' => 'success',
@@ -87,10 +95,9 @@ class DocumentsTable
             ])
             ->recordActions([
                 Action::make('review')
-                    ->label('Review')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->url(fn ($record): string => DocumentResource::getUrl('review', ['record' => $record]))
+                    ->url(fn($record): string => DocumentResource::getUrl('review', ['record' => $record]))
                     ->visible(function ($record): bool {
                         if (! Auth::check()) {
                             return false;
@@ -121,7 +128,7 @@ class DocumentsTable
                                     ->where('status', 'approved')
                                     ->with('reviewer:id,name')
                                     ->get()
-                                    ->mapWithKeys(fn (DocumentReview $review): array => [$review->user_id => $review->reviewer?->name ?? (string) $review->user_id])
+                                    ->mapWithKeys(fn(DocumentReview $review): array => [$review->user_id => $review->reviewer?->name ?? (string) $review->user_id])
                                     ->toArray();
                             })
                             ->required()
@@ -153,32 +160,66 @@ class DocumentsTable
                         return (bool) ($record->has_approved_reviews ?? false);
                     }),
                 Action::make('feedback')
-                    ->label('Feedback')
+                    // ->label('Feedback')
                     ->icon('heroicon-o-chat-bubble-left-right')
                     ->color('gray')
                     ->modalHeading('Recipient Feedback')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->infolist([
-                        RepeatableEntry::make('reviews')
-                            ->label('Reviews')
+                        RepeatableEntry::make('CurrentVersionReviews')
+                            ->hiddenLabel()
+                            ->placeholder('No feedback has been submitted yet.')
                             ->schema([
                                 TextEntry::make('reviewer.name')
-                                    ->label('Reviewer'),
+                                    ->weight(FontWeight::SemiBold)
+                                    ->icon('heroicon-o-user-circle'),
                                 TextEntry::make('status')
                                     ->badge()
-                                    ->color(fn (string $state): string => match ($state) {
+                                    ->color(fn(string $state): string => match ($state) {
                                         'approved' => 'success',
                                         'revision' => 'warning',
                                         default => 'gray',
                                     }),
+                                TextEntry::make('updated_at')
+                                    ->dateTime('d M Y · H:i')
+                                    ->icon('heroicon-o-clock')
+                                    ->color('gray'),
                                 TextEntry::make('message')
                                     ->placeholder('No message provided')
-                                    ->columnSpanFull(),
-                                TextEntry::make('updated_at')
-                                    ->label('Updated')
-                                    ->dateTime('d M Y H:i'),
+                                    ->columnSpanFull()
+                                    ->extraAttributes(['class' => 'rounded-lg bg-gray-50 dark:bg-white/5 p-3 text-sm']),
+                                TextEntry::make('attachment_name')
+                                    ->label('Attachment')
+                                    ->placeholder('No attachment')
+                                    ->columnSpanFull()
+                                    ->formatStateUsing(function ($state, $record): string {
+                                        if (! filled($record->attachment_path)) {
+                                            return e($state ?? '');
+                                        }
+
+                                        $downloadUrl = route('filament.documents.attachment.download', ['review' => $record->id]);
+                                        $previewUrl = route('filament.documents.attachment.preview', ['review' => $record->id]);
+
+                                        return Blade::render(
+                                            '<div>
+                                                <span class="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-1.5 text-sm shadow-sm">
+                                                    <a href="{{ $download }}" class="text-primary-600 dark:text-primary-400 underline hover:text-primary-500">{{ $name }}</a>
+                                                     <a href="{{ $preview }}" target="_blank" title="Preview in new tab" class="text-gray-400 hover:text-primary-500 transition-colors shrink-0">
+                                                        [Preview]
+                                                     </a>
+                                                </span>
+                                            </div>
+                                            <hr class="border-t border-gray-200 dark:border-white/10 mt-6" />',
+                                            ['download' => $downloadUrl, 'preview' => $previewUrl, 'name' => $state]
+                                        );
+                                    })
+
+                                    ->html()
+                                    ->visible(fn($record): bool => filled($record->attachment_path)),
                             ])
+                            ->columns(3)
+
                             ->contained(false),
                     ])
                     ->visible(function ($record): bool {
@@ -191,6 +232,7 @@ class DocumentsTable
                         return $user->hasAnyRole(['super_admin', 'admin']) || $record->uploader_id === $user->id;
                     }),
                 EditAction::make()
+                    ->label('Edit')
                     ->visible(function ($record): bool {
                         if (! Auth::check()) {
                             return false;
@@ -200,11 +242,21 @@ class DocumentsTable
 
                         return $user->hasAnyRole(['super_admin', 'admin']) || $record->uploader_id === $user->id;
                     }),
+                ViewAction::make('detail')
+                    ->label('Detail')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->url(
+                        fn(Model $record): string =>
+                        DocumentResource::getUrl('detail', ['record' => $record->id])
+                    )
+                    ->visible(fn($record): bool => Auth::check() && $record->uploader_id !== Auth::id())
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 }

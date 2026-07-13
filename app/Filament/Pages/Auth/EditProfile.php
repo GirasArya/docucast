@@ -23,6 +23,7 @@ class EditProfile extends BaseEditProfile
                 $this->getEmployeeNoFormComponent(),
                 $this->getJobTitleFormComponent(),
                 $this->getTelegramChatIdFormComponent(),
+                $this->getPhoneNumberFormComponent(),
             ]);
     }
 
@@ -34,7 +35,7 @@ class EditProfile extends BaseEditProfile
     protected function getNikFormComponent(): Component
     {
         return TextInput::make('nik')
-            ->label('Username (NIK)')
+            ->label('Username (NPK)')
             ->disabled();
     }
 
@@ -72,7 +73,21 @@ class EditProfile extends BaseEditProfile
         return TextInput::make('telegram_chat_id')
             ->label('Telegram Chat ID')
             ->password()
-            ->revealable();
+            ->revealable()
+            ->disabled();
+    }
+
+    /**
+     * Summary of getPhoneNumberFormComponent
+     *
+     * @return TextInput
+     */
+    protected function getPhoneNumberFormComponent(): Component
+    {
+        return TextInput::make('phone_number')
+            ->label('Phone Number')
+            ->numeric()
+            ->disabled();
     }
 
     /**

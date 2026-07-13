@@ -63,13 +63,18 @@ class Settings extends Page implements HasForms
                             ->required()
                             ->maxLength(255),
                         TextInput::make('telegram_chat_id')
+                            ->disabled()
                             ->label('Telegram Chat ID')
                             ->maxLength(255),
+                        TextInput::make('phone_number')
+                            ->label('Whatsapp Phone Number')
+                            ->disabled()
+                            ->numeric(),
                         TextInput::make('password')
                             ->label('Password Baru')
                             ->password()
-                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                            ->dehydrated(fn ($state) => filled($state))
+                            ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                            ->dehydrated(fn($state) => filled($state))
                             ->helperText('Kosongkan jika tidak ingin mengubah password.'),
                     ])
                     ->columns(2),

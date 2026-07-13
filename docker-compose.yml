@@ -31,14 +31,14 @@ services:
   app:
     build: &app-build
       context: .
-      target: app-runtime
+      target: ${APP_ENV:-production}
       args:
         FRONTEND_APP_NAME: ${VITE_APP_NAME:?VITE_APP_NAME is required}
         FRONTEND_REVERB_CLIENT: ${VITE_REVERB_APP_KEY:?VITE_REVERB_APP_KEY is required}
         FRONTEND_REVERB_HOST: ${VITE_REVERB_HOST:?VITE_REVERB_HOST is required}
         FRONTEND_REVERB_PORT: ${VITE_REVERB_PORT:?VITE_REVERB_PORT is required}
         FRONTEND_REVERB_SCHEME: ${VITE_REVERB_SCHEME:?VITE_REVERB_SCHEME is required}
-    image: 1808561084/docucast-app:v1
+    image: dasichs/docucast-app:latest
     container_name: docucast-app
     environment: &app-env
       - APP_NAME=${APP_NAME}
@@ -120,7 +120,6 @@ services:
       # Mount project directory for local development; persist storage
       - .:/var/www/html
       - /var/www/html/vendor
-      - /var/www/html/public/build
       - app-storage:/var/www/html/storage
     networks:
       - internal
@@ -133,7 +132,7 @@ services:
     build:
       context: .
       target: nginx-runtime
-    image: 1808561084/docucast-nginx:v1
+    image: dasichs/docucast-nginx:latest
     container_name: docucast-nginx
     depends_on:
       - app
@@ -141,7 +140,6 @@ services:
       # Mount project directory for local development; share storage
       - .:/var/www/html
       - /var/www/html/vendor
-      - /var/www/html/public/build
       - app-storage:/var/www/html/storage
     healthcheck:
       test:
@@ -195,7 +193,6 @@ services:
       # Mount project directory for local development; share storage
       - .:/var/www/html
       - /var/www/html/vendor
-      - /var/www/html/public/build
       - app-storage:/var/www/html/storage
     labels:
       # Traefik configuration for routing websocket connections through port 80/443
@@ -250,11 +247,21 @@ services:
     image: redis:alpine
     container_name: docucast-redis
     environment: *app-env
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--appendonly", "yes", "--save", "60", "1"]
+    command:
+      [
+        "redis-server",
+        "--requirepass",
+        "${REDIS_PASSWORD}",
+        "--appendonly",
+        "yes",
+        "--save",
+        "60",
+        "1",
+      ]
     expose:
       - 6379
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping"]
+      test: ["CMD-SHELL", 'redis-cli -a "$$REDIS_PASSWORD" ping']
       interval: 10s
       timeout: 5s
       retries: 10

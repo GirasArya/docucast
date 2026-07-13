@@ -6,7 +6,6 @@ use App\Filament\Resources\Documents\Pages\CreateDocument;
 use App\Filament\Resources\Documents\Pages\EditDocument;
 use App\Filament\Resources\Documents\Pages\ListDocuments;
 use App\Filament\Resources\Documents\Pages\ReviewDocument;
-use App\Filament\Resources\Documents\RelationManagers\VersionsRelationManager;
 use App\Filament\Resources\Documents\Schemas\DocumentForm;
 use App\Filament\Resources\Documents\Tables\DocumentsTable;
 use App\Models\Document;
@@ -27,11 +26,11 @@ class DocumentResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static bool $shouldSkipAuthorization = true;
+    protected static ?string $pluralModelLabel = 'Dokumen';
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Documents';
+        return 'Dokumen';
     }
 
     public static function form(Schema $schema): Schema
@@ -46,7 +45,7 @@ class DocumentResource extends Resource
 
     public static function canCreate(): bool
     {
-        return Auth::check() && Auth::user()->hasAnyRole(['super_admin', 'admin', 'uploader']);
+        return Auth::check() && Auth::user()->hasAnyRole(['admin', 'uploader']);
     }
 
     public static function canEdit(Model $record): bool
@@ -57,11 +56,21 @@ class DocumentResource extends Resource
 
         $user = Auth::user();
 
-        return $user->hasAnyRole(['super_admin', 'admin']) || $record->uploader_id === $user->id;
+        return $user->hasRole('admin') || $record->uploader_id === $user->id;
     }
 
     public static function canDelete(Model $record): bool
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
+        $user = Auth::user();
+
+        if ($record->status === 'approved' && ($user->hasRole('uploader') || $user->hasRole('recipient'))) {
+            return false;
+        }
+
         return static::canEdit($record);
     }
 
@@ -74,7 +83,7 @@ class DocumentResource extends Resource
         $user = Auth::user();
         $query = parent::getEloquentQuery();
 
-        if ($user->hasAnyRole(['super_admin', 'admin'])) {
+        if ($user->hasRole('admin')) {
             return $query;
         }
 
@@ -82,14 +91,14 @@ class DocumentResource extends Resource
 
         return $query->where(function (Builder $q) use ($userId): void {
             $q->where('uploader_id', $userId)
-                ->orWhereHas('recipients', fn (Builder $rq) => $rq->where('users.id', $userId));
+                ->orWhereHas('recipients', fn(Builder $rq) => $rq->where('users.id', $userId));
         });
     }
 
     public static function getRelations(): array
     {
         return [
-            VersionsRelationManager::class,
+            //
         ];
     }
 
@@ -101,6 +110,7 @@ class DocumentResource extends Resource
             'edit' => EditDocument::route('/{record}/edit'),
             'review' => ReviewDocument::route('/{record}/review'),
             'history' => Pages\DocumentHistory::route('/{record}/history'),
+            'detail' => Pages\DocumentDetail::route('/{record}/detail'),
         ];
     }
 }

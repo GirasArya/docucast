@@ -24,7 +24,7 @@ class UserForm
                             ->required()
                             ->maxLength(255),
                         TextInput::make('nik')
-                            ->label('NIK')
+                            ->label('NPK')
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
@@ -39,12 +39,20 @@ class UserForm
                             ->relationship('division', 'name')
                             ->searchable()
                             ->preload(),
-                        DateTimePicker::make('email_verified_at')
-                            ->label('Email Verified At'),
+                        TextInput::make('email')
+                            ->label('Email')
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true),
                         TextInput::make('telegram_chat_id')
+                            ->disabled()
                             ->label('Telegram Chat ID')
                             ->maxLength(255)
                             ->hint('Required for Telegram notifications.'),
+                        TextInput::make('phone_number')
+                            ->disabled()
+                            ->label('Whatsapp Phone Number')
+                            ->numeric()
+                            ->hint('Required for Whatsapp notifications.'),
                     ]),
 
                 Section::make('Security')
@@ -52,9 +60,9 @@ class UserForm
                         TextInput::make('password')
                             ->password()
                             ->revealable()
-                            ->required(fn (string $operation): bool => $operation === 'create')
-                            ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? bcrypt($state) : null)
-                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                            ->required(fn(string $operation): bool => $operation === 'create')
+                            ->dehydrateStateUsing(fn(?string $state): ?string => filled($state) ? bcrypt($state) : null)
+                            ->dehydrated(fn(?string $state): bool => filled($state)),
                     ]),
 
                 Section::make('Roles')
@@ -68,7 +76,7 @@ class UserForm
                                 'x-effect' => 'if (Array.isArray(state) && state.length > 0) { select?.closeDropdown() }',
                             ])
                             ->options(
-                                fn (): array => Role::query()
+                                fn(): array => Role::query()
                                     ->orderBy('name')
                                     ->pluck('name', 'name')
                                     ->toArray()

@@ -1165,20 +1165,15 @@
                         });
                     }
 
-                    this.timestamp = new Date().toLocaleString('id-ID', {
-                        timeZone: 'Asia/Jakarta',
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                    });
+                    // Manual fixed-format timestamp — avoids locale-dependent ICU output
+                    // that can vary in length across OS/browser versions and cause QR overflow.
+                    const _now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+                    const _pad = n => String(n).padStart(2, '0');
+                    this.timestamp = `${_pad(_now.getDate())}/${_pad(_now.getMonth() + 1)}/${_now.getFullYear()} ${_pad(_now.getHours())}:${_pad(_now.getMinutes())}:${_pad(_now.getSeconds())}`;
                     const payload = JSON.stringify({
-                        NPK: this.userNpk,
+                        NPK: this.userNPK,
                         Signer: this.userName,
                         Email: this.userEmail,
-                        HashCode: this.fileHash.slice(0, 32),
                         timestamp: this.timestamp,
                     });
                     const target = document.getElementById('own-qr-rt');

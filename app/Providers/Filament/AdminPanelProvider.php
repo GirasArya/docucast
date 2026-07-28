@@ -89,9 +89,15 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn() => auth()->check()
+                fn () => auth()->check()
                     ? view('filament.components.login-notice-popup-hook')
                     : view('filament.components.login-notice-cleanup'),
+            )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => auth()->check()
+                    ? \Illuminate\Support\Facades\Blade::render('@livewire(\App\Livewire\Filament\BroadcastAnnouncementModal::class)')
+                    : null,
             );
     }
 }

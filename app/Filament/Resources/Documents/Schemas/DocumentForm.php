@@ -68,6 +68,7 @@ class DocumentForm
                             ->markAsRequired(false)
                             ->hint('(*Wajib Diisi)')
                             ->hintColor('danger')
+                            ->helperText('(Maximum file size 10MB)')
                             ->directory('documents')
                             ->storeFileNamesIn('file_name')
                             ->pdfToolbar(true)

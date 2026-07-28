@@ -122,6 +122,7 @@ RUN set -eux; \
     rm -rf /var/cache/apk/* /tmp/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 COPY --chown=www-data:www-data docker/scripts/start-container.sh /usr/local/bin/start-container.sh
 COPY --chown=www-data:www-data docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 

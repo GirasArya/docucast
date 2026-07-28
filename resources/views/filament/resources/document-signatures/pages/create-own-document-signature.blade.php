@@ -989,10 +989,7 @@
                 async handleFile(file) {
                     this.error = '';
                     if (!file) return;
-                    if (file.type !== 'application/pdf') {
-                        this.error = 'Hanya file PDF yang diperbolehkan.';
-                        return;
-                    }
+
                     if (file.size > 10 * 1024 * 1024) {
                         this.error = 'Ukuran file tidak boleh melebihi 10 MB.';
                         return;

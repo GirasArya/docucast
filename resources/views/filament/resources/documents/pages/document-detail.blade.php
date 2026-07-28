@@ -164,7 +164,7 @@
 
         .dark .detail-description-box {
             background-color: rgba(255, 255, 255, 0.03);
-            border-color: rgba(255, 255, 255, 0.08);
+            border-color: rgba(156, 163, 175);
             color: rgb(209, 213, 219);
         }
 
@@ -207,6 +207,207 @@
         .btn-newtab-lg:hover {
             background-color: var(--primary-500) !important;
         }
+
+        /* Text colors (Replacing inline text-gray-800 / dark:text-gray-200 and subtexts) */
+        .detail-text-heading {
+            color: rgb(31, 41, 55);
+        }
+
+        .dark .detail-text-heading {
+            color: rgb(229, 231, 235);
+        }
+
+        .detail-text-subtext {
+            color: rgb(156, 163, 175);
+        }
+
+        .dark .detail-text-subtext {
+            color: rgb(107, 114, 128);
+        }
+
+        .detail-text-muted-desc {
+            color: rgb(107, 114, 128);
+        }
+
+        .dark .detail-text-muted-desc {
+            color: rgb(156, 163, 175);
+        }
+
+        /* Iframe preview container background */
+        .detail-iframe-wrapper {
+            background-color: rgb(249, 250, 251);
+        }
+
+        .dark .detail-iframe-wrapper {
+            background-color: rgb(3, 7, 18);
+        }
+
+        /* Primary icon badge box */
+        .detail-icon-primary-box {
+            background-color: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .dark .detail-icon-primary-box {
+            background-color: color-mix(in srgb, var(--primary-950) 40%, transparent);
+            color: var(--primary-400);
+        }
+
+        /* Amber icon badge box */
+        .detail-icon-amber-box {
+            background-color: rgb(254, 243, 199);
+            color: rgb(217, 119, 6);
+        }
+
+        .dark .detail-icon-amber-box {
+            background-color: rgba(120, 53, 15, 0.3);
+            color: rgb(251, 191, 36);
+        }
+
+        /* Generic muted icon badge box */
+        .detail-icon-muted-box {
+            background-color: rgb(243, 244, 246);
+            color: rgb(156, 163, 175);
+        }
+
+        .dark .detail-icon-muted-box {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: rgb(156, 163, 175);
+        }
+
+        /* Auto badge */
+        .detail-auto-badge {
+            background-color: var(--primary-50);
+            color: var(--primary-700);
+        }
+
+        .dark .detail-auto-badge {
+            background-color: color-mix(in srgb, var(--primary-950) 30%, transparent);
+            color: var(--primary-400);
+        }
+
+        /* Version History Container & Rows */
+        .version-history-container {
+            border: 1px solid rgb(229, 231, 235);
+            border-radius: 0.625rem;
+            overflow: hidden;
+        }
+
+        .dark .version-history-container {
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .version-history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.65rem 0.875rem;
+            font-size: 0.8125rem;
+            border-bottom: 1px solid rgb(229, 231, 235);
+            background-color: transparent;
+        }
+
+        .version-history-item:last-child {
+            border-bottom: none;
+        }
+
+        .dark .version-history-item {
+            border-bottom-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .version-history-item.is-latest {
+            background-color: rgba(239, 246, 255, 0.7);
+        }
+
+        .dark .version-history-item.is-latest {
+            background-color: rgba(30, 58, 138, 0.2);
+        }
+
+        .version-badge {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.25rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.375rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background-color: rgb(243, 244, 246);
+            color: rgb(107, 114, 128);
+        }
+
+        .dark .version-badge {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: rgb(156, 163, 175);
+        }
+
+        .version-badge.is-latest {
+            background-color: rgb(219, 234, 254);
+            color: rgb(29, 78, 216);
+        }
+
+        .dark .version-badge.is-latest {
+            background-color: rgba(30, 58, 138, 0.5);
+            color: rgb(147, 197, 253);
+        }
+
+        .version-filename {
+            margin: 0;
+            font-weight: 600;
+            color: rgb(31, 41, 55);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+        }
+
+        .dark .version-filename {
+            color: rgb(229, 231, 235);
+        }
+
+        .version-meta {
+            margin: 0.1rem 0 0;
+            font-size: 0.7rem;
+            color: rgb(107, 114, 128);
+        }
+
+        .dark .version-meta {
+            color: rgb(156, 163, 175);
+        }
+
+        .btn-version-download {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.4rem;
+            border: 1px solid rgb(209, 213, 219);
+            background-color: #ffffff;
+            color: rgb(55, 65, 81);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .btn-version-download:hover {
+            background-color: rgb(249, 250, 251);
+            color: rgb(17, 24, 39);
+        }
+
+        .dark .btn-version-download {
+            border-color: rgba(255, 255, 255, 0.12);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: rgb(209, 213, 219);
+        }
+
+        .dark .btn-version-download:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
     </style>
 
     <div class="flex flex-col gap-4 mt-4 mb-10">
@@ -218,9 +419,11 @@
                     <div class="detail-preview-header">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <div class="min-w-0">
-                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
-                                    {{ $record->file_name }}</p>
-                                <p class="text-[10px] text-gray-400 dark:text-gray-500">PDF · {{ $record->unique_code }}
+                                <p class="text-sm font-semibold detail-text-heading truncate">
+                                    {{ $record->file_name }}
+                                </p>
+                                <p class="text-[10px] detail-text-subtext">
+                                    PDF · {{ $record->unique_code }}
                                 </p>
                             </div>
                         </div>
@@ -234,7 +437,7 @@
                             Open in New Tab
                         </a>
                     </div>
-                    <div class="bg-gray-50 dark:bg-gray-950" style="position: relative; flex: 1 1 0%;">
+                    <div class="detail-iframe-wrapper" style="position: relative; flex: 1 1 0%;">
                         <iframe
                             src="{{ route('documents.preview', ['document' => $record, 'v' => $record->updated_at?->timestamp]) }}"
                             style="position: absolute; inset: 0; width: 100%; height: 100%; border: none;"></iframe>
@@ -243,14 +446,13 @@
 
                 {{-- Mobile fallback --}}
                 <div class="detail-mobile-preview">
-                    <div
-                        class="flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-500">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full detail-icon-primary-box">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">PDF preview not available on
+                    <p class="text-sm font-semibold detail-text-heading">PDF preview not available on
                         mobile</p>
                     <a href="{{ route('documents.preview', ['document' => $record, 'v' => $record->updated_at?->timestamp]) }}"
                         target="_blank" rel="noopener noreferrer" class="btn-newtab-lg w-full">
@@ -263,7 +465,7 @@
                     <div class="detail-preview-header">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <div
-                                class="shrink-0 flex h-7 w-7 items-center justify-center rounded-md bg-amber-50 dark:bg-amber-950/30 text-amber-500">
+                                class="shrink-0 flex h-7 w-7 items-center justify-center rounded-md detail-icon-amber-box">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                     stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -271,16 +473,15 @@
                                 </svg>
                             </div>
                             <div class="min-w-0">
-                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+                                <p class="text-sm font-semibold detail-text-heading truncate">
                                     {{ $record->file_name }}</p>
-                                <p class="text-[10px] text-gray-400 dark:text-gray-500">File ·
+                                <p class="text-[10px] detail-text-subtext">File ·
                                     {{ $record->unique_code }}</p>
                             </div>
                         </div>
                     </div>
                     <div class="detail-non-pdf-body">
-                        <div
-                            class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-400">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full detail-icon-muted-box">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -288,8 +489,8 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="font-semibold text-gray-800 dark:text-gray-200">No Preview Available</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xs mx-auto">This file type
+                            <p class="font-semibold detail-text-heading">No Preview Available</p>
+                            <p class="text-xs detail-text-muted-desc mt-1 max-w-xs mx-auto">This file type
                                 cannot be previewed in the browser.</p>
                         </div>
                     </div>
@@ -301,14 +502,13 @@
             <div class="detail-info-card">
                 {{-- Header --}}
                 <div class="flex items-center" style="margin-bottom: 1rem;">
-                    <div
-                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 shrink-0">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg detail-icon-primary-box shrink-0">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200">Document Information</h2>
+                    <h2 class="text-lg font-bold detail-text-heading">Document Information</h2>
                 </div>
 
                 {{-- Metadata Grid --}}
@@ -349,7 +549,7 @@
                                 {{ $record->limit_date->format('d M Y') }}
                                 @if ($record->auto_approve)
                                     <span
-                                        class="ml-1 text-[10px] font-semibold bg-primary-50 text-primary-700 dark:bg-primary-950/30 dark:text-primary-400 px-1.5 py-0.5 rounded">Auto</span>
+                                        class="ml-1 text-[10px] font-semibold detail-auto-badge px-1.5 py-0.5 rounded">Auto</span>
                                 @endif
                             </p>
                         </div>
@@ -363,10 +563,10 @@
                         <p class="detail-info-label mb-2">Uploader</p>
                         <div class="flex items-center gap-3">
                             <div class="min-w-0">
-                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+                                <p class="text-sm font-semibold detail-text-heading truncate">
                                     {{ $record->uploader->name }}</p>
                                 @if ($record->uploader->job_title)
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    <p class="text-xs detail-text-muted-desc truncate">
                                         {{ $record->uploader->job_title }}</p>
                                 @endif
                             </div>
@@ -391,33 +591,30 @@
                     <hr class="detail-divider">
                     <div>
                         <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
-                            <svg style="width:14px;height:14px;flex-shrink:0;color:#9ca3af;" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <svg style="width:14px;height:14px;flex-shrink:0;" class="detail-text-subtext"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                             </svg>
                             <p class="detail-info-label" style="margin-bottom:0;">Version History
                                 ({{ $versions->count() }})</p>
                         </div>
-                        <div style="border:1px solid 97c2fc;border-radius:0.625rem;overflow:hidden;">
+                        <div class="version-history-container">
                             @foreach ($versions as $version)
-                                <div
-                                    style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.65rem 0.875rem;font-size:0.8125rem;solid rgb(229,231,235);background:{{ $loop->first ? '#97c2fc' : 'transparent' }};">
+                                <div class="version-history-item {{ $loop->first ? 'is-latest' : '' }}">
                                     {{-- Version badge + info --}}
                                     <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;flex:1;">
-                                        <span
-                                            style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;min-width:2.25rem;padding:0.2rem 0.4rem;border-radius:0.375rem;font-size:0.7rem;font-weight:700;background:{{ $loop->first ? '#dbeafe' : '#f3f4f6' }};color:{{ $loop->first ? '#1d4ed8' : '#6b7280' }};">
+                                        <span class="version-badge {{ $loop->first ? 'is-latest' : '' }}">
                                             v{{ $version->version_number }}
                                             @if ($loop->first)
                                                 <span style="margin-left:3px;font-size:0.6rem;opacity:0.7;">★</span>
                                             @endif
                                         </span>
                                         <div style="min-width:0;">
-                                            <p style="margin:0;font-weight:600;color:{{ $loop->first ? 'rgb(17,24,39)' : '#97c2fc' }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;"
-                                                title="{{ $version->original_filename }}">
+                                            <p class="version-filename" title="{{ $version->original_filename }}">
                                                 {{ $version->original_filename ?: 'Document v' . $version->version_number }}
                                             </p>
-                                            <p style="margin:0.1rem 0 0;font-size:0.7rem;color:rgb(107,114,128);">
+                                            <p class="version-meta">
                                                 {{ $version->created_at->format('d M Y') }} ·
                                                 {{ $version->uploader?->name ?? '—' }}
                                             </p>
@@ -425,10 +622,7 @@
                                     </div>
                                     {{-- Download button --}}
                                     <a href="{{ route('documents.preview', ['document' => $record, 'version' => $version->version_number]) }}"
-                                        target="_blank" rel="noopener noreferrer"
-                                        style="flex-shrink:0;display:inline-flex;align-items:center;gap:0.3rem;padding:0.3rem 0.6rem;border-radius:0.4rem;border:1px solid rgb(209,213,219);background:white;color:rgb(55,65,81);font-size:0.7rem;font-weight:600;text-decoration:none;transition:background 0.15s;"
-                                        onmouseover="this.style.background='rgb(249,250,251)'"
-                                        onmouseout="this.style.background='white'">
+                                        target="_blank" rel="noopener noreferrer" class="btn-version-download">
                                         <svg style="width:11px;height:11px;" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round"

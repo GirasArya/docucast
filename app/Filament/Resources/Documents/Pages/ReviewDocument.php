@@ -75,16 +75,16 @@ class ReviewDocument extends Page implements HasForms
                                         <!-- Preview Header Bar -->
                                         <div class="review-preview-header">
                                             <div class="flex items-center space-x-3 truncate">
-                                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 shrink-0">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-lg review-icon-primary-box shrink-0">
                                                     <svg class="h-4 w-4" width="16" height="16" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                                     </svg>
                                                 </div>
                                                 <div class="truncate">
-                                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+                                                    <p class="text-sm font-semibold review-text-heading truncate">
                                                         ' . e($this->record->file_name) . '
                                                     </p>
-                                                    <p class="text-[10px] text-gray-400 dark:text-gray-500">
+                                                    <p class="text-[10px] review-text-subtext">
                                                         PDF Document • ' . e($this->record->unique_code) . '
                                                     </p>
                                                 </div>
@@ -103,7 +103,7 @@ class ReviewDocument extends Page implements HasForms
                                             </div>
                                         </div>
                                         <!-- Preview Content -->
-                                        <div class="bg-gray-50 dark:bg-gray-950" style="position: relative; flex: 1 1 0%;" x-data="{
+                                        <div class="review-iframe-wrapper" style="position: relative; flex: 1 1 0%;" x-data="{
                                             iframe: null,
                                             init() {
                                                 this.iframe = this.$el.querySelector(\'iframe\');
@@ -120,14 +120,14 @@ class ReviewDocument extends Page implements HasForms
 
                                     <!-- Mobile Layout: hidden on desktop, shown below md -->
                                     <div class="review-mobile-preview">
-                                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-500 mx-auto">
+                                        <div class="flex h-12 w-12 items-center justify-center rounded-full review-icon-primary-box mx-auto">
                                             <svg class="w-6 h-6" width="24" height="24" style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Mobile PDF Preview</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">PDF preview cannot be embedded directly on mobile devices.</p>
+                                            <p class="text-sm font-semibold review-text-heading">Mobile PDF Preview</p>
+                                            <p class="text-xs review-text-muted mt-1 font-medium">PDF preview cannot be embedded directly on mobile devices.</p>
                                         </div>
                                         <a href="' . e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])) . '"
                                            target="_blank"
@@ -144,16 +144,16 @@ class ReviewDocument extends Page implements HasForms
                                         <!-- Preview Header Bar -->
                                         <div class="review-preview-header">
                                             <div class="flex items-center space-x-3 truncate">
-                                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 shrink-0">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-lg review-icon-amber-box shrink-0">
                                                     <svg class="h-4 w-4" width="16" height="16" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                     </svg>
                                                 </div>
                                                 <div class="truncate">
-                                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+                                                    <p class="text-sm font-semibold review-text-heading truncate">
                                                         ' . e($this->record->file_name) . '
                                                     </p>
-                                                    <p class="text-[10px] text-gray-400 dark:text-gray-500">
+                                                    <p class="text-[10px] review-text-subtext">
                                                         File • ' . e($this->record->unique_code) . '
                                                     </p>
                                                 </div>
@@ -161,14 +161,14 @@ class ReviewDocument extends Page implements HasForms
                                         </div>
                                         <!-- Preview Content -->
                                         <div class="review-non-pdf-content">
-                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-500" style="display: flex; align-items: center; justify-content: center;">
+                                            <div class="flex h-16 w-16 items-center justify-center rounded-full review-icon-amber-box" style="display: flex; align-items: center; justify-content: center;">
                                                 <svg class="w-8 h-8" width="32" height="32" style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p class="font-semibold text-base text-gray-800 dark:text-gray-200">No Embedded Preview Available</p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xs mx-auto">This file type cannot be previewed directly inside the page. You can open it in a new window or download it to view.</p>
+                                                <p class="font-semibold text-base review-text-heading">No Embedded Preview Available</p>
+                                                <p class="text-xs review-text-muted mt-1 max-w-xs mx-auto">This file type cannot be previewed directly inside the page. You can open it in a new window or download it to view.</p>
                                             </div>
                                             <a href="' . e(route('documents.preview', ['document' => $this->record, 'v' => $this->record->updated_at?->timestamp])) . '"
                                                target="_blank"
@@ -211,7 +211,7 @@ class ReviewDocument extends Page implements HasForms
 
                                             FileUpload::make('attachment_path')
                                                 ->label('Attachment (Optional)')
-                                                ->helperText('Upload a marked-up document, screenshot, or signature if needed.')
+                                                ->helperText('Upload a marked-up document, screenshot')
                                                 ->directory('review-attachments')
                                                 ->storeFileNamesIn('attachment_name')
                                                 ->maxSize(5120) // 5MB

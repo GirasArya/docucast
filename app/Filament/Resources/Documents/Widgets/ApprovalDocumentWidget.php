@@ -78,6 +78,7 @@ class ApprovalDocumentWidget extends BaseWidget
                     })
                     ->sortable(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->recordAction(null)
             ->recordUrl(null)
             ->recordActions([

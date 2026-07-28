@@ -1167,23 +1167,28 @@
 
                     // Manual fixed-format timestamp — avoids locale-dependent ICU output
                     // that can vary in length across OS/browser versions and cause QR overflow.
-                    const _now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+                    const _now = new Date(new Date().toLocaleString('en-US', {
+                        timeZone: 'Asia/Jakarta'
+                    }));
                     const _pad = n => String(n).padStart(2, '0');
-                    this.timestamp = `${_pad(_now.getDate())}/${_pad(_now.getMonth() + 1)}/${_now.getFullYear()} ${_pad(_now.getHours())}:${_pad(_now.getMinutes())}:${_pad(_now.getSeconds())}`;
+                    this.timestamp =
+                        `${_pad(_now.getDate())}/${_pad(_now.getMonth() + 1)}/${_now.getFullYear()} ${_pad(_now.getHours())}:${_pad(_now.getMinutes())}:${_pad(_now.getSeconds())}`;
                     const payload = JSON.stringify({
                         NPK: this.userNPK,
-                        Signer: this.userName,
-                        Email: this.userEmail,
+                        Signer: this.userName.trim().replace(/\s+/g, ' '),
+                        Email: this.userEmail.trim(),
                         timestamp: this.timestamp,
                     });
                     const target = document.getElementById('own-qr-rt');
                     target.innerHTML = '';
+                    const byteSize = new Blob([payload]).size;
                     await new Promise(resolve => {
                         new QRCode(target, {
                             text: payload,
                             width: 256,
                             height: 256,
-                            correctLevel: QRCode.CorrectLevel.M
+                            correctLevel: byteSize > 100 ? QRCode.CorrectLevel.L : QRCode.CorrectLevel
+                                .M,
                         });
                         setTimeout(resolve, 160);
                     });
@@ -1199,9 +1204,8 @@
                             finalCanvas.height = 170;
                             const ctx = finalCanvas.getContext('2d');
 
-                            // Fill white background
-                            ctx.fillStyle = '#ffffff';
-                            ctx.fillRect(0, 0, 380, 170);
+                            // Fill transparent background
+                            ctx.clearRect(0, 0, 380, 170)
 
                             // Setup text fonts & styling
                             const textLeft = 42;
@@ -1512,7 +1516,11 @@
                         }
 
                         if (pdfDocInstance) {
-                            pdfDocInstance.save(this.fileName.replace(/\.pdf$/i, '') + '_signed.pdf');
+                            const signedFileName = this.fileName.replace(/\.pdf$/i, '') + '_signed.pdf';
+                            pdfDocInstance.save(signedFileName);
+                            if (this.$wire && typeof this.$wire.logExport === 'function') {
+                                this.$wire.logExport(null, signedFileName);
+                            }
                         }
                     } catch (err) {
                         this.error = 'Gagal mengunduh: ' + err.message;

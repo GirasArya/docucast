@@ -34,7 +34,6 @@ class DocumentForm
                                 .preview-sync-section {
                                     position: sticky !important;
                                     top: 2rem !important;
-                                    height: calc(100vh - 10rem) !important;
                                     align-self: flex-start !important;
                                     display: flex;
                                     flex-direction: column;

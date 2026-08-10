@@ -247,17 +247,7 @@ services:
     image: redis:alpine
     container_name: docucast-redis
     environment: *app-env
-    command:
-      [
-        "redis-server",
-        "--requirepass",
-        "${REDIS_PASSWORD}",
-        "--appendonly",
-        "yes",
-        "--save",
-        "60",
-        "1",
-      ]
+    command: redis-server --requirepass "${REDIS_PASSWORD}" --appendonly yes --save 60 1
     expose:
       - 6379
     healthcheck:

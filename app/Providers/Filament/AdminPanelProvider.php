@@ -47,12 +47,12 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Blue,
             ])
             ->font('Poppins')
+            ->globalSearch(false)
             ->databaseNotifications(
                 condition: fn(): bool => Auth::check(),
                 livewireComponent: DatabaseNotifications::class,
             )
-            ->databaseNotificationsPolling(null)
-            ->brandName(str('<div style="align-items: center; display: flex;"><img src="' . asset('logo_light.png') . '" alt="DocuCast" style="height: 40px; margin-right: 10px;"> DocuCast</div>')->inlineMarkdown()->toHtmlString())
+            ->brandLogo(fn() => view('filament.components.brand-logo'))
             ->favicon(asset('logo_light.png'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -92,6 +92,12 @@ class AdminPanelProvider extends PanelProvider
                 fn() => auth()->check()
                     ? view('filament.components.login-notice-popup-hook')
                     : view('filament.components.login-notice-cleanup'),
+            )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn() => auth()->check()
+                    ? \Illuminate\Support\Facades\Blade::render('@livewire(\App\Livewire\Filament\BroadcastAnnouncementModal::class)')
+                    : null,
             );
     }
 }

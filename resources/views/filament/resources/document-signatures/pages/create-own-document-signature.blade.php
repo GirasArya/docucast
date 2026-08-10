@@ -968,7 +968,8 @@
                     }
                     await Promise.all([
                         this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'),
-                        this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+                        this.loadScript('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js')
+                            .catch(() => this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js'))
                     ]);
                 },
 
@@ -989,10 +990,7 @@
                 async handleFile(file) {
                     this.error = '';
                     if (!file) return;
-                    if (file.type !== 'application/pdf') {
-                        this.error = 'Hanya file PDF yang diperbolehkan.';
-                        return;
-                    }
+
                     if (file.size > 10 * 1024 * 1024) {
                         this.error = 'Ukuran file tidak boleh melebihi 10 MB.';
                         return;
@@ -1165,30 +1163,30 @@
                         });
                     }
 
-                    this.timestamp = new Date().toLocaleString('id-ID', {
-                        timeZone: 'Asia/Jakarta',
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                    });
+                    // Manual fixed-format timestamp — avoids locale-dependent ICU output
+                    // that can vary in length across OS/browser versions and cause QR overflow.
+                    const _now = new Date(new Date().toLocaleString('en-US', {
+                        timeZone: 'Asia/Jakarta'
+                    }));
+                    const _pad = n => String(n).padStart(2, '0');
+                    this.timestamp =
+                        `${_pad(_now.getDate())}/${_pad(_now.getMonth() + 1)}/${_now.getFullYear()} ${_pad(_now.getHours())}:${_pad(_now.getMinutes())}:${_pad(_now.getSeconds())}`;
                     const payload = JSON.stringify({
-                        NPK: this.userNpk,
-                        Signer: this.userName,
-                        Email: this.userEmail,
-                        HashCode: this.fileHash.slice(0, 32),
+                        NPK: this.userNPK,
+                        Signer: this.userName.trim().replace(/\s+/g, ' '),
+                        Email: this.userEmail.trim(),
                         timestamp: this.timestamp,
                     });
                     const target = document.getElementById('own-qr-rt');
                     target.innerHTML = '';
+                    const byteSize = new Blob([payload]).size;
                     await new Promise(resolve => {
                         new QRCode(target, {
                             text: payload,
                             width: 256,
                             height: 256,
-                            correctLevel: QRCode.CorrectLevel.M
+                            correctLevel: byteSize > 100 ? QRCode.CorrectLevel.L : QRCode.CorrectLevel
+                                .M,
                         });
                         setTimeout(resolve, 160);
                     });
@@ -1204,9 +1202,8 @@
                             finalCanvas.height = 170;
                             const ctx = finalCanvas.getContext('2d');
 
-                            // Fill white background
-                            ctx.fillStyle = '#ffffff';
-                            ctx.fillRect(0, 0, 380, 170);
+                            // Fill transparent background
+                            ctx.clearRect(0, 0, 380, 170)
 
                             // Setup text fonts & styling
                             const textLeft = 42;
@@ -1440,84 +1437,72 @@
                 },
 
                 async downloadSigned() {
-                    if (!this.anyQrReady || !_pdfDoc || !window.jspdf) return;
+                    if (!this.anyQrReady || !this.fileObj) return;
+                    if (!window.PDFLib) {
+                        this.error = 'Pustaka pdf-lib belum siap. Silakan coba beberapa saat lagi.';
+                        return;
+                    }
                     this.loading = true;
                     this.error = '';
                     try {
-                        const {
-                            jsPDF
-                        } = window.jspdf;
-                        let pdfDocInstance = null;
+                        const { PDFDocument } = window.PDFLib;
 
-                        const RENDER_SCALE = 2.5; // fixed rasterization quality, independent of page size
+                        // Load original PDF directly to preserve all links, text layers, vector graphics, and metadata
+                        const arrayBuffer = await this.fileObj.arrayBuffer();
+                        const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+                        const pages = pdfDoc.getPages();
 
                         for (let i = 1; i <= this.pageCount; i++) {
-                            const page = await _pdfDoc.getPage(i);
-
-                            // Original page size in PDF points (this is the TRUE physical size — e.g. A4 = 595.28 x 841.89)
-                            const vp0 = page.getViewport({
-                                scale: 1
-                            });
-                            const pageWidthPt = vp0.width;
-                            const pageHeightPt = vp0.height;
-
-                            // Render at higher resolution for crisp output, but this does NOT affect final page size
-                            const viewport = page.getViewport({
-                                scale: RENDER_SCALE
-                            });
-                            const tempCanvas = document.createElement('canvas');
-                            tempCanvas.width = viewport.width;
-                            tempCanvas.height = viewport.height;
-                            const ctx = tempCanvas.getContext('2d');
-                            await page.render({
-                                canvasContext: ctx,
-                                viewport: viewport
-                            }).promise;
-
                             const config = this.pageQrs[i];
                             if (config && config.dataUrl && config.refW && config.refH) {
+                                const pdfPage = pages[i - 1];
+                                if (!pdfPage) continue;
+
+                                let embeddedImage;
+                                if (config.dataUrl.startsWith('data:image/png')) {
+                                    embeddedImage = await pdfDoc.embedPng(config.dataUrl);
+                                } else {
+                                    embeddedImage = await pdfDoc.embedJpg(config.dataUrl);
+                                }
+
+                                const { width: pageWidthPt, height: pageHeightPt } = pdfPage.getSize();
+
                                 const qrXPct = config.x / config.refW;
                                 const qrYPct = config.y / config.refH;
                                 const qrSizePctW = config.size / config.refW;
-
-                                const qrImg = await new Promise((resolve, reject) => {
-                                    const img = new Image();
-                                    img.onload = () => resolve(img);
-                                    img.onerror = () => reject(new Error('Gagal memuat gambar QR halaman ' +
-                                        i));
-                                    img.src = config.dataUrl;
-                                });
-
-                                const qrCx = qrXPct * tempCanvas.width;
-                                const qrCy = qrYPct * tempCanvas.height;
-                                const qrSz = qrSizePctW * tempCanvas.width;
                                 const qrHeightRatio = config.heightRatio || 1.0;
 
-                                ctx.drawImage(qrImg, qrCx, qrCy, qrSz, qrSz * qrHeightRatio);
-                            }
+                                const drawWidthPt = qrSizePctW * pageWidthPt;
+                                const drawHeightPt = drawWidthPt * qrHeightRatio;
+                                const drawXPt = qrXPct * pageWidthPt;
 
-                            const imgData = tempCanvas.toDataURL('image/jpeg', 0.95);
+                                // Convert top-left Y (canvas coordinate) to bottom-left Y (PDF coordinate)
+                                const drawYPt = pageHeightPt - (qrYPct * pageHeightPt) - drawHeightPt;
 
-                            if (i === 1) {
-                                pdfDocInstance = new jsPDF({
-                                    orientation: pageWidthPt > pageHeightPt ? 'l' : 'p',
-                                    unit: 'pt', // ← physical unit, not px
-                                    format: [pageWidthPt,
-                                        pageHeightPt
-                                    ], // ← TRUE original page size (A4, Letter, etc.)
-                                    compress: true
+                                pdfPage.drawImage(embeddedImage, {
+                                    x: drawXPt,
+                                    y: drawYPt,
+                                    width: drawWidthPt,
+                                    height: drawHeightPt,
                                 });
-                            } else {
-                                pdfDocInstance.addPage([pageWidthPt, pageHeightPt], pageWidthPt > pageHeightPt ? 'l' :
-                                    'p');
                             }
-
-                            // Draw the (higher-res) image scaled DOWN to fit the true page point-size
-                            pdfDocInstance.addImage(imgData, 'JPEG', 0, 0, pageWidthPt, pageHeightPt);
                         }
 
-                        if (pdfDocInstance) {
-                            pdfDocInstance.save(this.fileName.replace(/\.pdf$/i, '') + '_signed.pdf');
+                        const pdfBytes = await pdfDoc.save();
+                        const signedFileName = this.fileName.replace(/\.pdf$/i, '') + '_signed.pdf';
+
+                        // Trigger download
+                        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = signedFileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(link.href);
+
+                        if (this.$wire && typeof this.$wire.logExport === 'function') {
+                            this.$wire.logExport(null, signedFileName);
                         }
                     } catch (err) {
                         this.error = 'Gagal mengunduh: ' + err.message;

@@ -50,18 +50,22 @@ class DrawSignaturePage extends Page
                 throw new \Exception('Dekode data gambar gagal.');
             }
 
+            if (strlen($decodedData) > 200 * 1024) {
+                throw new \Exception('Ukuran file tanda tangan melebihi batas maksimum 200 KB.');
+            }
+
             // Generate clean filename
-            $safeName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $fileName);
-            if (!str_ends_with($safeName, '.png')) {
+            $safeName = time().'_'.preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $fileName);
+            if (! str_ends_with($safeName, '.png')) {
                 $safeName .= '.png';
             }
 
             // Ensure directory exists
-            if (!Storage::disk('public')->exists('signatures')) {
+            if (! Storage::disk('public')->exists('signatures')) {
                 Storage::disk('public')->makeDirectory('signatures');
             }
 
-            $path = 'signatures/' . $safeName;
+            $path = 'signatures/'.$safeName;
             Storage::disk('public')->put($path, $decodedData);
 
             DrawSignature::create([
@@ -90,7 +94,7 @@ class DrawSignaturePage extends Page
     {
         try {
             $sig = DrawSignature::where('user_id', auth()->id())->findOrFail($id);
-            
+
             // Delete file
             if (Storage::disk('public')->exists($sig->file_path)) {
                 Storage::disk('public')->delete($sig->file_path);

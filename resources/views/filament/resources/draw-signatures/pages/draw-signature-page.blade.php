@@ -637,11 +637,11 @@
                                 Tarik & lepas gambar tanda tangan
                             </span>
                             <span class="upload-text-sub">
-                                atau klik untuk memilih dari penyimpanan lokal
+                                atau klik untuk memilih dari penyimpanan lokal (Maks. 200 KB)
                             </span>
                         </div>
                         <span class="badge-png">
-                            filetype/png
+                            PNG • Maks. 200 KB
                         </span>
                     </label>
 
@@ -894,9 +894,20 @@
                 handleFileSelect(file) {
                     if (!file) return;
                     if (file.type !== 'image/png') {
-                        // Display notification inside Filament
                         new FilamentNotification()
-                            .title('Hanya format file PNG yang didukung.')
+                            .title('Format file tidak sesuai')
+                            .body('Hanya format gambar PNG yang didukung.')
+                            .danger()
+                            .send();
+                        return;
+                    }
+
+                    const maxSizeBytes = 200 * 1024; // 200 KB
+                    if (file.size > maxSizeBytes) {
+                        const sizeInKb = (file.size / 1024).toFixed(1);
+                        new FilamentNotification()
+                            .title('Ukuran file terlalu besar')
+                            .body(`Ukuran file (${sizeInKb} KB) melebihi batas maksimum 200 KB.`)
                             .danger()
                             .send();
                         return;

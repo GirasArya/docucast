@@ -155,11 +155,14 @@
         @endif
     </x-filament::modal>
 
-    <x-filament::modal id="database-notification-document-detail" heading="Document Review Details" width="2xl"
+    <x-filament::modal id="database-notification-document-detail" heading="Notification Details" width="2xl"
         close-button teleport="body">
         @php
             $details = data_get($this->selectedNotificationData, 'viewData.detail', []);
             $revisionMessage = $details['review_message'] ?? null;
+            $title = data_get($this->selectedNotificationData, 'title');
+            $body = data_get($this->selectedNotificationData, 'body');
+            $actions = data_get($this->selectedNotificationData, 'actions', []);
         @endphp
 
         @if (!empty($details))
@@ -186,15 +189,42 @@
                         {{ filled($revisionMessage) ? $revisionMessage : 'No revision message provided.' }}
                     </dd>
                 </div>
-                <div class="sm:col-span-2 flex justify-end">
-                    <a href="/admin/documents/{{ $details['document_id'] }}/review">
-                        <button
-                            style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 12px;">
-                            Detail
-                        </button>
-                    </a>
-                </div>
+                @if (!empty($details['document_id']))
+                    <div class="sm:col-span-2 flex justify-end">
+                        <a href="/admin/documents/{{ $details['document_id'] }}/review">
+                            <button
+                                style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 12px;">
+                                Detail
+                            </button>
+                        </a>
+                    </div>
+                @endif
             </dl>
+        @elseif (filled($title) || filled($body) || !empty($actions))
+            <div class="space-y-4 text-sm">
+                @if (filled($title))
+                    <h3 class="font-semibold text-base text-gray-900 dark:text-white">{{ $title }}</h3>
+                @endif
+
+                @if (filled($body))
+                    <p class="text-gray-600 dark:text-gray-300 whitespace-pre-line">{{ $body }}</p>
+                @endif
+
+                @if (!empty($actions))
+                    <div class="flex flex-wrap gap-2 pt-3 justify-end">
+                        @foreach ($actions as $action)
+                            @if (!empty($action['url']))
+                                <a href="{{ $action['url'] }}" target="{{ ($action['shouldOpenInNewTab'] ?? false) ? '_blank' : '_self' }}">
+                                    <button
+                                        style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                        {{ $action['label'] ?? 'Download File' }}
+                                    </button>
+                                </a>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         @else
             <div class="text-sm text-gray-600">
                 Notification details are unavailable.

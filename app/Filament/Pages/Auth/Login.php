@@ -16,7 +16,7 @@ class Login extends BaseAuth
             ->components([
                 $this->getNikFormComponent(),
                 $this->getPasswordFormComponent(),
-                $this->getRememberFormComponent(),
+                // $this->getRememberFormComponent(),
             ]);
     }
 

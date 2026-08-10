@@ -34,7 +34,6 @@ class DocumentForm
                                 .preview-sync-section {
                                     position: sticky !important;
                                     top: 2rem !important;
-                                    height: calc(100vh - 10rem) !important;
                                     align-self: flex-start !important;
                                     display: flex;
                                     flex-direction: column;
@@ -68,6 +67,7 @@ class DocumentForm
                             ->markAsRequired(false)
                             ->hint('(*Wajib Diisi)')
                             ->hintColor('danger')
+                            ->helperText('(Maximum file size 10MB)')
                             ->directory('documents')
                             ->storeFileNamesIn('file_name')
                             ->pdfToolbar(true)
